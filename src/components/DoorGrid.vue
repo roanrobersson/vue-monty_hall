@@ -1,0 +1,36 @@
+<template>
+    <div class="door-grid">
+        <Door v-for="(door, i) in doors"
+            :key="door.number" :door="door"
+            @door-click="$emit('door-click', i)"
+        />
+    </div>
+</template>
+
+<script>
+import Door from "./Door.vue";
+
+export default {
+    name: 'DoorGrid',
+    
+    components: {
+        Door,
+    },
+
+    props: {
+            doors: {
+                    type: Array,
+                    required: true,
+            }
+    }
+}
+</script>
+
+<style scoped>
+.door-grid {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    margin-top: 25px;
+}
+</style>
