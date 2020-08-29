@@ -4,12 +4,16 @@
             :style="{visibility: door.chance > 0 ? 'visible' : 'hidden'}">
             {{ door.chance }}%
         </div>
-        <div class="door-frame">
+        <div class="door-frame"
+            :class="doorFrameToggleClass">
                 <div class="reward-container">
                     <img class="reward" src="img/car.png" v-if="door.haveCar">
                     <img class="reward" src="img/goat.png" v-else>
                 </div>
-            <div class="door" :class="doorToggleClass" @click="$emit('door-click', door)">
+            <div class="door" 
+                :class="doorToggleClass"
+                :style="{ transition: 'all ' + transitionTime / 1000 + 's ease-in-out'}"
+                @click="$emit('door-click', door)">
                 <span class="door-number">{{ door.number }}</span>
             </div>
         </div>
@@ -25,16 +29,26 @@ export default {
             type: Object,
             required: true,
         },
+        transitionTime: {
+            type: Number,
+            required: false,
+            default: 0.5,
+        },
     },
 
     computed: {
+        doorFrameToggleClass: function() {
+            return {
+                'door-frame-selected': this.door.selected,
+            }
+        },
         doorToggleClass: function () {
             return {
                 'door-open': this.door.openned,
                 'door-selected': this.door.selected,
                 'door-selectable': this.door.selectable && !this.door.selected,
             }
-        }
+        },
     }
 }
 </script>
@@ -52,7 +66,17 @@ export default {
     background-color: black;
     color: white;
     font-family: 'silkscreennormal';
-    font-size: 64px;
+    font-size: 48px;
+}
+
+@media screen and (min-width: 600px) {
+    .door-frame {
+        font-size: 64px;
+    }
+}
+
+.door-frame-selected {
+    border-color: rgb(1, 92, 1);
 }
 
 .door {
@@ -62,7 +86,6 @@ export default {
     align-items: center;
     position: relative;
     border: 2px solid black;
-    transition: all 0.5s ease-in-out; /*Speed of the Door animation*/
     transform-origin: left;
     background-color: Sienna;
     width: 75px;

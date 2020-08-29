@@ -61,6 +61,8 @@ export default {
     height: 25px;
     cursor: pointer;
     background: #4CAF50;
+    border-radius: 0px;
+    border-color: black;
 }
 
 .slider::-moz-range-thumb {
@@ -68,5 +70,7 @@ export default {
     height: 25px;
     cursor: pointer;
     background: #4CAF50;
+    border-radius: 0px;
+    border-color: black;
 }
 </style>

@@ -1,7 +1,9 @@
 <template>
     <div class="door-grid">
         <Door v-for="(door, i) in doors"
-            :key="door.number" :door="door"
+            :key="door.number" 
+            :door="door"
+            :transitionTime="transitionTime"
             @door-click="$emit('door-click', i)"
         />
     </div>
@@ -18,10 +20,15 @@ export default {
     },
 
     props: {
-            doors: {
-                    type: Array,
-                    required: true,
-            }
+        doors: {
+            type: Array,
+            required: true,
+        },
+        transitionTime: {
+            type: Number,
+            required: false,
+            default: 0.5,
+        },
     }
 }
 </script>

@@ -1,6 +1,9 @@
 <template>
     <div class="panelStatus">
         <div class="panelStatus-item">
+            Rounds: <span>{{rounds}}</span>
+        </div>
+        <div class="panelStatus-item">
             Wins: <span>{{wins}}</span>
         </div>
         <div class="panelStatus-item">
@@ -14,6 +17,11 @@ export default {
     name: 'PanelStatus',
     
     props: {
+            rounds: {
+                    type: Number,
+                    required: true,
+                    default: 0,
+            },
             wins: {
                     type: Number,
                     required: true,
@@ -23,7 +31,7 @@ export default {
                     type: Number,
                     required: true,
                     default: 0,
-            }
+            },
     }
 }
 </script>
