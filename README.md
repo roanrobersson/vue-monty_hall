@@ -3,4 +3,4 @@
 ### Live demo: https://roanrobersson.github.io/vue-monty_hall/live_demo
 
 
- ![](live_demo/img/live_demo.png)
+ ![](public/img/live_demo.png)
