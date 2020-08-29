@@ -9,12 +9,15 @@
                     @new-game='newGame($event)'
                 />
                 <PanelStatus 
+                    :rounds='rounds'
                     :wins='wins'
                     :loses='loses'
                 />
 			</div>
             <Message class="message" :text="message"/>
-			<doorGrid class="doorGrid" :doors='doors'
+			<DoorGrid class="doorGrid" 
+                :doors='doors'
+                :transitionTime='transitionTime'
                 @door-click="doorClick($event)"
             />
 		</div>
@@ -43,6 +46,7 @@ export default {
             doorsQuantity: 0,
             minDoors: 3,
             maxDoors: 99,
+            rounds: 0,
             wins: 0,
             loses: 0,
             playerChosenDoor: null,
@@ -50,30 +54,39 @@ export default {
             doorWithCar: null,
             state: 'notStarted',
             message: '',
+            transitionTime: 500, //milliseconds
+            timeout: null, //setInterval function
         }
     },
 
     methods: {
-        newGame(doorsQuantity){
-            this.doorsQuantity = doorsQuantity;
-            this.playerChosenDoor = null;
-            this.doorKeepedClosed = null;
-            this.doorWithCar = null;
-            this.doors = [];
-            const doorDefaultChance = this.roundToTwoDecimals(100 / doorsQuantity);
-            for(let i = 0; i < doorsQuantity; i++) {
-                this.doors.push({
-                    number: i + 1,
-                    haveCar: false,
-                    openned: false,
-                    selected: false,
-                    selectable: true,
-                    chance: doorDefaultChance,
-                });   
+        newGame(doorsQuantity) {
+            clearTimeout(this.timeout);
+            for(let i = 0; i < this.doors.length; i++) {
+                this.doors[i].openned = false;  
             }
-            this.hideCar();
-            this.message = 'Chose a door'
-            this.state = 'choseDoor';
+            this.state = 'waitingTimeout';
+            this.timeout = setTimeout(() => {
+                this.doors = [];
+                this.doorsQuantity = doorsQuantity;
+                this.playerChosenDoor = null;
+                this.doorKeepedClosed = null;
+                this.doorWithCar = null;
+                const doorDefaultChance = this.roundToTwoDecimals(100 / doorsQuantity);
+                for(let i = 0; i < doorsQuantity; i++) {
+                    this.doors.push({
+                        number: i + 1,
+                        haveCar: false,
+                        openned: false,
+                        selected: false,
+                        selectable: true,
+                        chance: doorDefaultChance,
+                    });   
+                }
+                this.hideCar();
+                this.message = 'Chose a door'
+                this.state = 'choseDoor';
+            }, this.transitionTime);
         },
 
         hideCar() {
@@ -102,17 +115,7 @@ export default {
             }
             this.doorKeepedClosed.chance = this.roundToTwoDecimals(100 / this.doorsQuantity * (this.doorsQuantity - 1));
             this.state = 'decideChange';
-            this.message = 'Do you want to change the door?';
-        },
-
-        randomIntInclusive(min, max) {
-            min = Math.ceil(min);
-            max = Math.floor(max);
-            return Math.floor(Math.random() * (max - min + 1)) + min;
-        },
-
-        roundToTwoDecimals(number) {
-            return Math.round(number * 100) / 100;
+            this.message = 'Do you want to keep or change the door?';
         },
 
         doorClick(i) {
@@ -124,13 +127,40 @@ export default {
                     this.giveHint();
                     break;
                 case 'decideChange':
-                    this.playerChosenDoor.selected = false;
-                    this.playerChosenDoor = this.doors[i];
-                    this.playerChosenDoor.selected = true;
-                    
-
+                    if (this.playerChosenDoor !== this.doors[i]) {
+                        this.playerChosenDoor.selected = false;
+                        this.doorKeepedClosed = this.playerChosenDoor;
+                        this.doorKeepedClosed.selectable = false;
+                        this.playerChosenDoor = this.doors[i];
+                        this.playerChosenDoor.selected = true;
+                    }
+                    this.state = 'waitingTimeout'
+                    this.timeout = setTimeout(() => {
+                        this.doorWithCar.openned = true;
+                        this.playerChosenDoor.openned = true;
+                        this.doorKeepedClosed.openned = true;
+                        if (this.playerChosenDoor.haveCar) {
+                            this.message = 'You win!';
+                            this.wins++;
+                        } else {
+                            this.message = 'You lose!';
+                            this.loses++;
+                        }
+                        this.state = 'gameEnd';
+                        this.rounds++;
+                    }, this.transitionTime * 2);
                     break;
             }
+        },
+
+        randomIntInclusive(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        },
+
+        roundToTwoDecimals(number) {
+            return Math.round(number * 100) / 100;
         },
     }
 }
