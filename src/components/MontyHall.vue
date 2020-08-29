@@ -11,7 +11,7 @@
                 <PanelStatus 
                     :rounds='rounds'
                     :wins='wins'
-                    :loses='loses'
+                    :losses='losses'
                 />
 			</div>
             <Message class="message" :text="message"/>
@@ -48,7 +48,7 @@ export default {
             maxDoors: 99,
             rounds: 0,
             wins: 0,
-            loses: 0,
+            losses: 0,
             playerChosenDoor: null,
             doorKeepedClosed: null,
             doorWithCar: null,
@@ -144,7 +144,7 @@ export default {
                             this.wins++;
                         } else {
                             this.message = 'You lose!';
-                            this.loses++;
+                            this.losses++;
                         }
                         this.state = 'gameEnd';
                         this.rounds++;

@@ -7,7 +7,7 @@
             Wins: <span>{{wins}}</span>
         </div>
         <div class="panelStatus-item">
-            Loses: <span>{{loses}}</span>
+            Losses: <span>{{losses}}</span>
         </div>
     </div>
 </template>
@@ -27,7 +27,7 @@ export default {
                     required: true,
                     default: 0,
             },
-            loses: {
+            losses: {
                     type: Number,
                     required: true,
                     default: 0,
