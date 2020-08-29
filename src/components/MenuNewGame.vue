@@ -4,8 +4,8 @@
             Doors: <span id="doorsCount">{{doorsQuantity}}</span>
         </div>
         <Slider 
-            :min='3'
-            :max='100'
+            :min='minDoors'
+            :max='maxDoors'
             @slide='doorsQuantity = $event'
         />
         <Button label='New Game' 
@@ -26,6 +26,19 @@ export default {
         Slider,
     },
     
+    props: {
+        minDoors: {
+                type: Number,
+                required: true,
+                default: 0,
+        },
+        maxDoors: {
+                type: Number,
+                required: true,
+                default: 99,
+        },
+    },
+
     data: function () {
         return {
             doorsQuantity: 3,

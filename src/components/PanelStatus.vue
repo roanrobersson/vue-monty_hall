@@ -29,10 +29,15 @@ export default {
 </script>
 
 <style scoped>
+.panelStatus {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
 .panelStatus > * {
     margin-bottom: 0.5em;
-}
-.panelStatus-item {
-
+    white-space: nowrap;
 }
 </style>

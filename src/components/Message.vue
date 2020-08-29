@@ -1,6 +1,6 @@
 <template>
     <div class="message" v-if="text !== ''">
-        {{ text }} 
+        {{ text }}
     </div>
 </template>
 
@@ -22,7 +22,7 @@ export default {
 .message {
     color: black;
     border: solid white 2px;
-    padding: 5px 0;
+    padding: 5px 10px;
     text-align: center;
 }
 

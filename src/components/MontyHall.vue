@@ -3,7 +3,11 @@
 		<div class="game">
 			<h1 class="title">Monty Hall Game</h1>
 			<div class="menu">
-                <MenuNewGame @new-game='newGame($event)'/>
+                <MenuNewGame 
+                :minDoors='minDoors'
+                :maxDoors='maxDoors'
+                    @new-game='newGame($event)'
+                />
                 <PanelStatus 
                     :wins='wins'
                     :loses='loses'
@@ -36,6 +40,9 @@ export default {
     data: function() {
         return {
             doors: [],
+            doorsQuantity: 0,
+            minDoors: 3,
+            maxDoors: 99,
             wins: 0,
             loses: 0,
             playerChosenDoor: null,
@@ -48,10 +55,12 @@ export default {
 
     methods: {
         newGame(doorsQuantity){
+            this.doorsQuantity = doorsQuantity;
             this.playerChosenDoor = null;
             this.doorKeepedClosed = null;
             this.doorWithCar = null;
             this.doors = [];
+            const doorDefaultChance = this.roundToTwoDecimals(100 / doorsQuantity);
             for(let i = 0; i < doorsQuantity; i++) {
                 this.doors.push({
                     number: i + 1,
@@ -59,6 +68,7 @@ export default {
                     openned: false,
                     selected: false,
                     selectable: true,
+                    chance: doorDefaultChance,
                 });   
             }
             this.hideCar();
@@ -77,7 +87,7 @@ export default {
             if(this.playerChosenDoor === this.doorWithCar) {
                 doorsClone.splice(doorsClone.indexOf(this.playerChosenDoor), 1); 
                 const doorKeepedClosedIndex = this.randomIntInclusive(0, doorsClone.length - 1);
-                this.doorKeepedClosed = this.doors[doorKeepedClosedIndex];
+                this.doorKeepedClosed = doorsClone[doorKeepedClosedIndex];
                 doorsClone.splice(doorKeepedClosedIndex, 1);
             } else {
                 this.doorKeepedClosed = doorsClone[doorsClone.indexOf(this.doorWithCar)];
@@ -88,7 +98,9 @@ export default {
             for(let i=0; i < doorsClone.length; i++) {
                 doorsClone[i].openned = true;
                 doorsClone[i].selectable = false;
+                doorsClone[i].chance = 0;
             }
+            this.doorKeepedClosed.chance = this.roundToTwoDecimals(100 / this.doorsQuantity * (this.doorsQuantity - 1));
             this.state = 'decideChange';
             this.message = 'Do you want to change the door?';
         },
@@ -99,14 +111,25 @@ export default {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         },
 
+        roundToTwoDecimals(number) {
+            return Math.round(number * 100) / 100;
+        },
+
         doorClick(i) {
-            if (this.state === 'choseDoor') {
-                if (this.playerChosenDoor !== null) {
+            if (!this.doors[i].selectable) return;
+            switch (this.state) {
+                case 'choseDoor':
+                    this.playerChosenDoor = this.doors[i];
+                    this.playerChosenDoor.selected = true;
+                    this.giveHint();
+                    break;
+                case 'decideChange':
                     this.playerChosenDoor.selected = false;
-                }
-                this.playerChosenDoor = this.doors[i];
-                this.playerChosenDoor.selected = true;
-                this.giveHint();
+                    this.playerChosenDoor = this.doors[i];
+                    this.playerChosenDoor.selected = true;
+                    
+
+                    break;
             }
         },
     }
@@ -140,12 +163,12 @@ export default {
     display: flex;
     align-items: stretch;
     flex-direction: column;
-    padding: 0 10px;
+    padding: 0 20px;
 }
 
 @media screen and (min-width: 600px) {
     .game {
-        align-items: center;
+        
     }
 }
 
@@ -180,9 +203,11 @@ export default {
 
 .message {
     margin-top: 1rem;
+    align-self: center;
 }
 
 .doorGrid {
-    margin-top: 1rem; 
+    margin-top: 1rem;
+    flex-grow: 1;
 }
 </style>

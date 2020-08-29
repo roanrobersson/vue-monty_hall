@@ -33,4 +33,10 @@ export default {
     flex-wrap: wrap;
     margin-top: 25px;
 }
+
+.door-grid > * {
+    margin-left: 1.5em;
+    margin-right: 1.5em;
+    margin-bottom: 1em;
+}
 </style>
