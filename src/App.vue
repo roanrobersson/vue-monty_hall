@@ -1,16 +1,16 @@
 <template>
   <div id="app">
-    <MontyHall/>
+    <Game/>
   </div>
 </template>
 
 <script>
-import MontyHall from './components/MontyHall.vue'
+import Game from './views/Game.vue'
 
 export default {
   name: 'App',
   components: {
-    MontyHall,
+    Game,
   }
 }
 </script>

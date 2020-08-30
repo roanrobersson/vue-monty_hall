@@ -1,12 +1,12 @@
 <template>
-    <div class="door-grid">
+    <transition-group class="door-grid" name="doorList" tag="div" >
         <Door v-for="(door, i) in doors"
             :key="door.number" 
             :door="door"
             :transitionTime="transitionTime"
             @door-click="$emit('door-click', i)"
         />
-    </div>
+    </transition-group>
 </template>
 
 <script>
@@ -42,8 +42,22 @@ export default {
 }
 
 .door-grid > * {
+    transition: all 1s;
     margin-left: 1.5em;
     margin-right: 1.5em;
     margin-bottom: 1em;
+}
+
+.doorList-enter {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.doorList-leave-to {
+    transition: all 0s;
+}
+
+.doorList-leave-active {
+    position: absolute;
 }
 </style>

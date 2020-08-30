@@ -1,21 +1,23 @@
 <template>
-    <div class="panelStatus">
-        <div class="panelStatus-item">
+    <div class="panel">
+        <div class="panel-item">
             Rounds: <span>{{rounds}}</span>
         </div>
-        <div class="panelStatus-item">
+        <div class="panel-item">
             Wins: <span>{{wins}}</span>
         </div>
-        <div class="panelStatus-item">
+        <div class="panel-item">
             Losses: <span>{{losses}}</span>
         </div>
     </div>
 </template>
 
 <script>
+import Panel from './Panel';
+
 export default {
+    extends: Panel,
     name: 'PanelStatus',
-    
     props: {
             rounds: {
                     type: Number,
@@ -33,19 +35,6 @@ export default {
                     default: 0,
             },
     }
+
 }
 </script>
-
-<style scoped>
-.panelStatus {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-
-.panelStatus > * {
-    margin-bottom: 0.5em;
-    white-space: nowrap;
-}
-</style>
