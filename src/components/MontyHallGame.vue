@@ -1,6 +1,5 @@
 <template>
 	<div class="montyHall">
-        <button @click="pop()">POP</button>
 		<div class="game">
 			<h1 class="title">Monty Hall Game</h1>
 			<div class="menu">
@@ -62,10 +61,6 @@ export default {
     },
 
     methods: {
-        pop() {
-            if (this.doorsQuantity === 0) {console.log('')}
-            this.doors.pop();
-        },
         newGame(doorsQuantity) {
             clearTimeout(this.timeout);
             for(let i = 0; i < this.doors.length; i++) {
