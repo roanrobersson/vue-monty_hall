@@ -9,7 +9,7 @@
             @slide='doorsQuantity = $event'
         />
         <Button label='New Game' 
-            @click.stop.native="$emit('new-game', doorsQuantity)"
+            @click.stop.native="$emit('new-game-click', doorsQuantity)"
         />
     </div>
 </template>
@@ -56,5 +56,6 @@ export default {
 
 .menu-newGame > * {
     margin-bottom: 0.5em;
+    white-space: nowrap;
 }
 </style>

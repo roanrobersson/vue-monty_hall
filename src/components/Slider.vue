@@ -13,14 +13,14 @@ export default {
     
     props: {
         min: {
-                type: Number,
-                required: true,
-                default: 0,
+            type: Number,
+            required: true,
+            default: 0,
         },
         max: {
-                type: Number,
-                required: true,
-                default: 100,
+            type: Number,
+            required: true,
+            default: 100,
         },
     },
 

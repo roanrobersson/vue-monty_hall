@@ -1,5 +1,8 @@
 <template>
-    <div class="message" v-if="text !== ''">
+    <div class="message" 
+        v-if="text !== ''"
+        :style="{opacity: opacity}"
+    >
         {{ text }}
     </div>
 </template>
@@ -10,10 +13,57 @@ export default {
     
     props: {
             text: {
-                    type: String,
-                    required: false,
-                    default: '',
+                type: String,
+                required: false,
+                default: '',
             },
+            blink: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            fade: {
+                type: Boolean,
+                required: false,
+                default: false,
+            },
+            inDuration: {
+                type: Number,
+                required: false,
+                default: 1000,
+            },
+            outDuration: {                
+                type: Number,
+                required: false,
+                default: 1000,
+            },
+    },
+
+    data: function () {
+        return {
+            opacity: 1,
+        }
+    },
+
+    created: function () {
+        if (this.blink) {
+            this.in();
+        }
+    },
+
+    methods: {
+        in() {
+            setTimeout(() => {
+                this.opacity = 0;
+                this.out();
+            }, this.inDuration)
+        },
+        out() {
+            setTimeout(() => {
+                this.opacity = 1;
+                this.in();
+            }, this.outDuration)
+        },
     }
 }
 </script>

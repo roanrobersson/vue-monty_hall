@@ -1,21 +1,41 @@
 <template>
 	<div class="montyHall">
 		<div class="game">
-			<h1 class="title">Monty Hall Game</h1>
+            <h1 class="title">{{ title }}</h1> 
 			<div class="menu">
                 <MenuNewGame 
-                :minDoors='minDoors'
-                :maxDoors='maxDoors'
-                    @new-game='newGame($event)'
+                    v-show="!simulationMode"
+                    :minDoors='minDoors'
+                    :maxDoors='maxDoors'
+                    @new-game-click='newGameClick($event)'
+                />
+                <MenuSimulator 
+                   v-show="simulationMode"
+                    :minDoors='minDoors'
+                    :maxDoors='maxDoors'
+                    :simulationState='simulationState'
+                    @run-simulation-click='runSimulationClick($event)'
+                    @pause-simulation-click='pauseSimulationClick()'
+                    @continue-simulation-click='continueSimulationClick($event)'
+                    @finish-simulation-click='finishSimulationClick()'
                 />
                 <PanelStatus 
                     :rounds='rounds'
                     :wins='wins'
                     :losses='losses'
+                    :keepeds='keepeds'
+                    :changeds='changeds'
                 />
 			</div>
-            <Message class="message" :text="message"/>
-			<DoorGrid class="doorGrid" 
+            <Message class="message"
+                v-if="!simulationMode"
+                :text="message" 
+                :blink='true'
+                :inDuration='1000'
+                :outDuration='250'
+            />
+			<DoorGrid class="doorGrid"
+                v-if="!simulationMode"
                 :doors='doors'
                 :transitionTime='transitionTime'
                 @door-click="onDoorClick($event)"
@@ -28,8 +48,11 @@
 import DoorGrid from './DoorGrid.vue'
 import PanelStatus from './PanelStatus.vue'
 import MenuNewGame from './MenuNewGame.vue'
+import MenuSimulator from './MenuSimulator.vue'
 import Message from './Message.vue'
 import GameState from '../constants/GameState.js'
+import MontyHallGameMixin from '../mixins/MontyHallGameMixin.js' 
+import MontyHallSimulatorMixin from '../mixins/MontyHallSimulatorMixin.js'
 
 export default {
     name: 'MontyHall',
@@ -38,127 +61,67 @@ export default {
             DoorGrid,
             PanelStatus,
             MenuNewGame,
+            MenuSimulator,
             Message,
     },
 
-    data: function() {
-        return {
-            doors: [],
-            doorsQuantity: 0,
-            minDoors: 3,
-            maxDoors: 99,
-            rounds: 0,
-            wins: 0,
-            losses: 0,
-            playerChosenDoor: null,
-            doorKeepedClosed: null,
-            doorWithCar: null,
-            state: GameState.NOT_STARTED,
-            message: '',
-            transitionTime: 500, //milliseconds
-            timeout: null, //setInterval function
+    mixins: [
+        MontyHallGameMixin,
+        MontyHallSimulatorMixin,
+    ],
+
+    props: {
+        simulationMode: {
+            type: Boolean,
+            required: true,
+        }
+    },
+
+    computed: {
+        title: function () {
+            return !this.simulationMode ? 'Monty Hall Game' : 'Monty Hall Simulator';
+        }
+    },
+
+    watch: {
+        simulationMode: function() {
+            if (!this.simulationMode) {
+                this.finishSimulation();
+                this.resetGame();
+                this.resetStatus();
+            }
         }
     },
 
     methods: {
-        newGame(doorsQuantity) {
+        newGameClick(doorsQuantity) {
             clearTimeout(this.timeout);
             for(let i = 0; i < this.doors.length; i++) {
                 this.doors[i].openned = false;  
             }
             this.state = GameState.WAITING_TIMEOUT;
             this.timeout = setTimeout(() => {
-                this.doors = [];
-                this.doorsQuantity = doorsQuantity;
-                this.playerChosenDoor = null;
-                this.doorKeepedClosed = null;
-                this.doorWithCar = null;
-                const doorDefaultChance = this.roundToTwoDecimals(100 / doorsQuantity);
-                for(let i = 0; i < doorsQuantity; i++) {
-                    this.doors.push({
-                        number: i + 1,
-                        haveCar: false,
-                        openned: false,
-                        selected: false,
-                        selectable: true,
-                        chance: doorDefaultChance,
-                    });   
-                }
-                this.hideCar();
-                this.message = 'Chose a door'
-                this.state = GameState.CHOSE_DOOR;
+                this.newGame(doorsQuantity);
             }, this.transitionTime);
         },
 
-        hideCar() {
-            const i = this.randomIntInclusive(0, this.doors.length - 1);
-            this.doors[i].haveCar = true;
-            this.doorWithCar = this.doors[i];
-        },
-
-        giveHint() {
-            const doorsClone = this.doors.slice(0, this.doors.length);
-            if(this.playerChosenDoor === this.doorWithCar) {
-                doorsClone.splice(doorsClone.indexOf(this.playerChosenDoor), 1); 
-                const doorKeepedClosedIndex = this.randomIntInclusive(0, doorsClone.length - 1);
-                this.doorKeepedClosed = doorsClone[doorKeepedClosedIndex];
-                doorsClone.splice(doorKeepedClosedIndex, 1);
-            } else {
-                this.doorKeepedClosed = doorsClone[doorsClone.indexOf(this.doorWithCar)];
-                doorsClone.splice(doorsClone.indexOf(this.playerChosenDoor), 1); 
-                doorsClone.splice(doorsClone.indexOf(this.doorWithCar), 1);
-            }
-            //Open all remaining doors
-            for(let i=0; i < doorsClone.length; i++) {
-                doorsClone[i].openned = true;
-                doorsClone[i].selectable = false;
-                doorsClone[i].chance = 0;
-            }
-            this.doorKeepedClosed.chance = this.roundToTwoDecimals(100 / this.doorsQuantity * (this.doorsQuantity - 1));
-            this.state = GameState.DECIDE_CHANGE;
-            this.message = 'Do you want to keep or change the door?';
-        },
-
         onDoorClick(i) {
-            if (!this.doors[i].selectable) return;
-            switch (this.state) {
-                case GameState.CHOSE_DOOR:
-                    this.playerChosenDoor = this.doors[i];
-                    this.playerChosenDoor.selected = true;
-                    this.giveHint();
-                    break;
-                case GameState.DECIDE_CHANGE:
-                    if (this.playerChosenDoor !== this.doors[i]) {
-                        this.playerChosenDoor.selected = false;
-                        this.doorKeepedClosed = this.playerChosenDoor;
-                        this.doorKeepedClosed.selectable = false;
-                        this.playerChosenDoor = this.doors[i];
-                        this.playerChosenDoor.selected = true;
-                    }
-                    this.doorWithCar.openned = true;
-                    this.playerChosenDoor.openned = true;
-                    this.doorKeepedClosed.openned = true;
-                    if (this.playerChosenDoor.haveCar) {
-                        this.message = 'You win!';
-                        this.wins++;
-                    } else {
-                        this.message = 'You lose!';
-                        this.losses++;
-                    }
-                    this.state = GameState.ENDED;
-                    this.rounds++;
-                    break;
-            }
+            this.doorSelect(i);
         },
 
-        randomIntInclusive(min, max) {
-            min = Math.ceil(min);
-            max = Math.floor(max);
-            return Math.floor(Math.random() * (max - min + 1)) + min;
+        runSimulationClick(parameters) {
+            this.runSimulation(parameters);
         },
 
-        roundToTwoDecimals(number) {
-            return Math.round(number * 100) / 100;
+        pauseSimulationClick() {
+            this.pauseSimulation();
+        },
+
+        continueSimulationClick(parameters) {
+            this.continueSimulation(parameters);
+        },
+        finishSimulationClick() {
+            this.finishSimulation();
         },
     }
 }
@@ -182,7 +145,7 @@ export default {
 
 @media screen and (min-width: 600px) {
     .title {
-        margin-top: 3rem;
+        margin-top: 0;
         font-size: 50px;
     }
 }
